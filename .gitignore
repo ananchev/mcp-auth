@@ -1,0 +1,16 @@
+# Secrets / state
+.env
+*.env
+!.env.example
+/data/
+refresh.json
+refresh.json.tmp
+
+# Build output
+/out/
+mcp-auth
+
+# macOS / editors
+.DS_Store
+.vscode/
+.idea/
