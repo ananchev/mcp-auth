@@ -1,0 +1,30 @@
+services:
+  mcp-auth:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: mcp-auth:latest
+    container_name: mcp-auth
+    env_file: .env
+    environment:
+      MCP_HTTP_ADDR: ":8092"
+      # Refresh-token store lives on the volume so it survives deploys (no re-auth).
+      MCP_OAUTH_REFRESH_STORE: /data/refresh.json
+    volumes:
+      - mcp-auth-data:/data
+    ports:
+      # Publish on the Docker host's LAN so the separate NPM box can reach it.
+      # Bind to a specific host IP to avoid all-interfaces exposure:
+      #   "${HOST_LAN_IP}:8092:8092"
+      - "${AUTH_PORT:-8092}:8092"
+    restart: unless-stopped
+
+volumes:
+  mcp-auth-data:
+
+# Networking model (mirrors healthbridge): NPM runs on a SEPARATE LAN box (with a
+# router :443 port-forward for public access). This container publishes :8092 on the
+# Docker host's LAN IP; NPM's proxy host for mcp-auth.<your-domain> forwards to
+# http://<docker-host-LAN-IP>:8092. No shared Docker network. See deploy/NETWORKING.md.
+#
+# If the Docker host has a firewall (ufw/nftables), allow the NPM box to reach :8092.
